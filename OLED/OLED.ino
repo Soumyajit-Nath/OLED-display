@@ -1,59 +1,62 @@
-#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+// Define OLED dimensions and I2C address
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1  // Reset pin not used
+#define DISPLAY_ADDRESS 0x3C
 
-// Declaration for SSD1306 display connected using I2C
-#define OLED_RESET     -1 // Reset pin
-#define SCREEN_ADDRESS 0x3C
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// Define custom I2C pins
+#define OLED_SDA 17  // Change to your chosen SDA pin
+#define OLED_SCL 16  // Change to your chosen SCL pin
 
-void setup()
-{
+TwoWire I2C_OLED = TwoWire(0);  // Use a custom Wire instance
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &I2C_OLED, OLED_RESET);
+
+void setup() {
   Serial.begin(9600);
-}
-void loop(){
-  // initialize the OLED object
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
+
+  // Initialize I2C with custom pins
+  I2C_OLED.begin(OLED_SDA, OLED_SCL);
+
+  // Initialize the display
+  if (!display.begin(SSD1306_SWITCHCAPVCC, DISPLAY_ADDRESS)) {
+    Serial.println("SSD1306 allocation failed");
+    while (true)
+      ;  // Stop if the display doesn't initialize
   }
 
-  // Clear the buffer.
+  // Display "Hello, World!" message
   display.clearDisplay();
-
-  // Display Text
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0,0);
-  display.println("Welcome to Agri Arena ");
+  display.setTextSize(2);  // Set text size to make it readable
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 20);  // Set cursor position
+  display.println("WELCOME");
   display.display();
-  delay(2000);
-  display.clearDisplay();
+  delay(5000);
 
-  // Scroll full screen
-  display.setCursor(0,0);
-  display.setTextSize(1);
-  // display.println("Full");
-  // display.println("screen");
-  // display.println("scrolling!");
-  // display.display();
-  display.startscrollright(0x00, 0x07);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrollleft(0x00, 0x07);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);    
-  display.startscrolldiagright(0x00, 0x07);
-  delay(2000);
-  display.startscrolldiagleft(0x00, 0x07);
-  delay(2000);
-  display.stopscroll();
+  // Clear the screen after welcome message
   display.clearDisplay();
+}
 
+void loop() {
+      // Example of dynamic content to display sensor data
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+
+    // Display heading
+    display.setCursor(0, 0);
+    display.println("Agri Arena");
+    display.println("Sensor Data");
+
+    // Simulate temperature and humidity values
+    float temperature = 24.5;  // Replace with actual reading
+    float humidity = 60.2;     // Replace with actual reading
+    float soilMoisture = 45.0; // Replace with actual reading
+
+    display.display();
+    delay(3000);
 }
